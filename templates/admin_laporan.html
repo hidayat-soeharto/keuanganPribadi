@@ -1,0 +1,116 @@
+{% extends "layout.html" %}
+
+{% block title %}Laporan Transaksi{% endblock %}
+
+{% block content %}
+<div class="dashboard-header" style="margin-bottom: 2rem;">
+    <p style="color: #64748b; font-size: 0.9rem;">Filter dan lihat laporan seluruh transaksi</p>
+</div>
+
+<!-- Filter Form -->
+<div class="card" style="margin-bottom: 2rem; padding: 1.5rem;">
+    <form method="GET" action="{{ url_for('laporan') }}">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; align-items: end;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #475569; font-size: 0.85rem;">Dari Tanggal</label>
+                <input type="date" name="start_date" class="form-control" value="{{ start_date }}" style="width: 100%; padding: 0.6rem 0.8rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem;">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #475569; font-size: 0.85rem;">Sampai Tanggal</label>
+                <input type="date" name="end_date" class="form-control" value="{{ end_date }}" style="width: 100%; padding: 0.6rem 0.8rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem;">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #475569; font-size: 0.85rem;">User</label>
+                <select name="user_id" class="form-control" style="width: 100%; padding: 0.6rem 0.8rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; background: white; color: {{ '#94a3b8' if not filter_user else '#1e293b' }};">
+                    <option value="" disabled {{ 'selected' if not filter_user else '' }} style="color: #94a3b8;">-- Pilih User --</option>
+                    <option value="" {{ 'selected' if filter_user == '' else '' }}>Semua User</option>
+                    {% for user in users %}
+                    <option value="{{ user['id'] }}" {{ 'selected' if filter_user|string == user['id']|string else '' }}>{{ user['username'] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #475569; font-size: 0.85rem;">Tipe</label>
+                <select name="tipe" class="form-control" style="width: 100%; padding: 0.6rem 0.8rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; background: white; color: {{ '#94a3b8' if not filter_tipe else '#1e293b' }};">
+                    <option value="" disabled {{ 'selected' if not filter_tipe else '' }} style="color: #94a3b8;">-- Pilih Tipe --</option>
+                    <option value="" {{ 'selected' if filter_tipe == '' else '' }}>Semua Tipe</option>
+                    <option value="Pemasukan" {{ 'selected' if filter_tipe == 'Pemasukan' else '' }}>Pemasukan</option>
+                    <option value="Pengeluaran" {{ 'selected' if filter_tipe == 'Pengeluaran' else '' }}>Pengeluaran</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="submit" class="btn-primary" style="padding: 0.6rem 1.2rem; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
+                    <i class="fa-solid fa-filter"></i> Filter
+                </button>
+                <a href="{{ url_for('laporan') }}" class="btn-secondary" style="padding: 0.6rem 1rem; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; text-decoration: none;">
+                    <i class="fa-solid fa-rotate-left"></i> Reset
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Summary Cards -->
+<div class="dashboard-grid" style="margin-bottom: 1.5rem;">
+    <div class="card summary-card">
+        <h3>Total Pemasukan</h3>
+        <div class="amount positive">{{ total_pemasukan | rupiah }}</div>
+    </div>
+    <div class="card summary-card">
+        <h3>Total Pengeluaran</h3>
+        <div class="amount negative">{{ total_pengeluaran | rupiah }}</div>
+    </div>
+    <div class="card summary-card saldo">
+        <h3>Selisih</h3>
+        <div class="amount">{{ (total_pemasukan - total_pengeluaran) | rupiah }}</div>
+    </div>
+</div>
+
+<!-- Transaction Table -->
+<div class="card recent-transactions">
+    <div class="card-header" style="margin-bottom: 1rem;">
+        <h3 style="font-weight: 600; color: #1e293b;">Hasil Laporan</h3>
+        <span style="background: #e2e8f0; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; color: #475569;">{{ transaksi|length }} transaksi</span>
+    </div>
+    
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Tanggal</th>
+                    <th>User</th>
+                    <th>Tipe</th>
+                    <th>Kategori</th>
+                    <th>Jumlah</th>
+                    <th>Catatan</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in transaksi %}
+                <tr>
+                    <td>{{ t['tanggal'] }}</td>
+                    <td><span class="badge" style="background: #e2e8f0; color: #475569; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.8rem;">{{ t['username'] }}</span></td>
+                    <td>
+                        <span class="badge {{ 'bg-green' if t['tipe'] == 'Pemasukan' else 'bg-red' }}">
+                            {{ t['tipe'] }}
+                        </span>
+                    </td>
+                    <td>{{ t['kategori'] }}</td>
+                    <td style="font-weight: 600; color: {{ '#2ecc71' if t['tipe'] == 'Pemasukan' else '#e74c3c' }};">
+                        {{ t['jumlah'] | rupiah }}
+                    </td>
+                    <td style="color: #64748b;">{{ t['catatan'] or '-' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 2rem; color: #94a3b8;">
+                        <i class="fa-solid fa-inbox" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>
+                        Tidak ada data yang sesuai filter.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

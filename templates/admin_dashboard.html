@@ -1,0 +1,146 @@
+{% extends "layout.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-header" style="margin-bottom: 2rem;">
+    <p style="color: #64748b; font-size: 0.9rem;">Ringkasan Data Seluruh Pengguna</p>
+</div>
+
+<!-- Ringkasan Cards (Global) -->
+<div class="dashboard-grid" style="margin-bottom: 1.5rem;">
+    <div class="card summary-card">
+        <h3>Total Pemasukan (Global)</h3>
+        <div class="amount positive">{{ ringkasan['pemasukan'] | rupiah }}</div>
+    </div>
+    <div class="card summary-card">
+        <h3>Total Pengeluaran (Global)</h3>
+        <div class="amount negative">{{ ringkasan['pengeluaran'] | rupiah }}</div>
+    </div>
+    <div class="card summary-card saldo">
+        <h3>Total Saldo Sistem</h3>
+        <div class="amount">{{ ringkasan['saldo'] | rupiah }}</div>
+    </div>
+</div>
+
+<!-- Chart Section -->
+<div class="dashboard-grid" style="margin-top: 1.5rem;">
+    <div class="card chart-container" style="grid-column: span 2;">
+        <h3 style="margin-bottom: 1rem;">Statistik Per User</h3>
+        <canvas id="userChart"></canvas>
+    </div>
+    <div class="card chart-container">
+        <h3 style="margin-bottom: 1rem;">Ringkasan Global</h3>
+        <canvas id="globalChart"></canvas>
+    </div>
+</div>
+
+<!-- Transaction Table (Read Only) -->
+<div class="card recent-transactions" style="margin-top: 2.5rem;">
+    <div class="card-header" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-weight: 600; color: #1e293b;">Transaksi Terbaru</h3>
+        <a href="{{ url_for('laporan') }}" class="btn-link" style="color: #3b82f6; text-decoration: none; font-size: 0.9rem;">Lihat Laporan Lengkap →</a>
+    </div>
+    
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Tanggal</th>
+                    <th>User</th>
+                    <th>Tipe</th>
+                    <th>Kategori</th>
+                    <th>Jumlah</th>
+                    <th>Catatan</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in transaksi[:10] %}
+                <tr>
+                    <td>{{ t['tanggal'] }}</td>
+                    <td><span class="badge" style="background: #e2e8f0; color: #475569;">{{ t['username'] }}</span></td>
+                    <td>
+                        <span class="badge {{ 'bg-green' if t['tipe'] == 'Pemasukan' else 'bg-red' }}">
+                            {{ t['tipe'] }}
+                        </span>
+                    </td>
+                    <td>{{ t['kategori'] }}</td>
+                    <td class="{{ 'text-green-600' if t['tipe'] == 'Pemasukan' else 'text-red-600' }}">
+                        {{ t['jumlah'] | rupiah }}
+                    </td>
+                    <td>{{ t['catatan'] }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-gray-500">Belum ada data transaksi.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+// User Stats Chart (Bar Chart)
+const userCtx = document.getElementById('userChart').getContext('2d');
+new Chart(userCtx, {
+    type: 'bar',
+    data: {
+        labels: [{% for s in stats_per_user %}'{{ s.username }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+        datasets: [
+            {
+                label: 'Pemasukan',
+                data: [{% for s in stats_per_user %}{{ s.pemasukan }}{% if not loop.last %}, {% endif %}{% endfor %}],
+                backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                borderColor: 'rgba(46, 204, 113, 1)',
+                borderWidth: 1
+            },
+            {
+                label: 'Pengeluaran',
+                data: [{% for s in stats_per_user %}{{ s.pengeluaran }}{% if not loop.last %}, {% endif %}{% endfor %}],
+                backgroundColor: 'rgba(231, 76, 60, 0.7)',
+                borderColor: 'rgba(231, 76, 60, 1)',
+                borderWidth: 1
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return 'Rp ' + value.toLocaleString('id-ID');
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Global Summary Chart (Doughnut)
+const globalCtx = document.getElementById('globalChart').getContext('2d');
+new Chart(globalCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Pemasukan', 'Pengeluaran'],
+        datasets: [{
+            data: [{{ ringkasan['pemasukan'] }}, {{ ringkasan['pengeluaran'] }}],
+            backgroundColor: ['rgba(46, 204, 113, 0.8)', 'rgba(231, 76, 60, 0.8)'],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

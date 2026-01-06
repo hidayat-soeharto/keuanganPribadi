@@ -1,0 +1,387 @@
+{% extends "layout.html" %}
+
+{% block title %}Manajemen Transaksi{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header" style="margin-bottom: 20px; flex-direction: column; align-items: stretch; gap: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Daftar Transaksi</h2>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-secondary" onclick="showTransferModal()" style="padding: 0.6rem 1.2rem; display: flex; align-items: center; gap: 8px; border: none; cursor: pointer;">
+                    <i class="fa-solid fa-money-bill-transfer"></i> Transfer
+                </button>
+                <button class="btn-primary" onclick="openModal('tambah')">
+                    <i class="fa-solid fa-plus"></i> Tambah Data
+                </button>
+            </div>
+        </div>
+        
+        <!-- Filter Form -->
+        <form id="filterForm" action="{{ url_for('transaksi') }}" method="get" class="filter-form" style="display: flex; gap: 15px; flex-wrap: wrap; background: #f8fafc; padding: 20px; border-radius: 12px; align-items: flex-end; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+            <div style="flex: 1; min-width: 150px;">
+                <label for="start_date" style="font-size: 0.85rem; font-weight: 600; color: #64748b; margin-bottom: 8px;">Dari Tanggal</label>
+                <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date if start_date else '' }}" required>
+            </div>
+            <div style="flex: 1; min-width: 150px;">
+                <label for="end_date" style="font-size: 0.85rem; font-weight: 600; color: #64748b; margin-bottom: 8px;">Sampai Tanggal</label>
+                <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date if end_date else '' }}" required>
+            </div>
+            <div style="flex: 1; min-width: 150px;">
+                <label for="filter_tipe" style="font-size: 0.85rem; font-weight: 600; color: #64748b; margin-bottom: 8px;">Tipe</label>
+                <select name="tipe" id="filter_tipe" class="form-control select2" data-placeholder="Pilih Tipe">
+                    <option value=""></option>
+                    <option value="Semua" {{ 'selected' if filter_tipe == 'Semua' else '' }}>Semua Tipe</option>
+                    <option value="Pemasukan" {{ 'selected' if filter_tipe == 'Pemasukan' else '' }}>Pemasukan</option>
+                    <option value="Pengeluaran" {{ 'selected' if filter_tipe == 'Pengeluaran' else '' }}>Pengeluaran</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn-primary" style="padding: 0.6rem 1.2rem; display: flex; align-items: center; gap: 8px; border-radius: 8px;">
+                    <i class="fa-solid fa-filter"></i> Filter
+                </button>
+                <a href="{{ url_for('transaksi') }}" class="btn-secondary" style="background: white; border: 1px solid #e2e8f0; color: #64748b; padding: 0.6rem 1rem; border-radius: 8px; display: flex; align-items: center; gap: 5px; text-decoration: none; transition: all 0.2s;">
+                    <i class="fa-solid fa-arrows-rotate"></i> Reset
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <table id="transaksiTable" style="margin-top: 10px;">
+        <thead>
+            <tr>
+                <th>Tanggal</th>
+                <th>Tipe</th>
+                <th>Kategori</th>
+                <th>Jumlah</th>
+                <th>Catatan</th>
+                <th style="width: 100px; text-align: center;">Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in transaksi %}
+            <tr>
+                <td>{{ t.tanggal }}</td>
+                <td>
+                    <span class="badge {{ 'bg-green' if t.tipe == 'Pemasukan' else 'bg-red' }}">
+                        {{ t.tipe }}
+                    </span>
+                </td>
+                <td>{{ t.kategori }}</td>
+                <td class="{{ 'positive' if t.tipe == 'Pemasukan' else 'negative' }}">
+                    {{ t.jumlah | rupiah }}
+                </td>
+                <td>{{ t.catatan }}</td>
+                <td>
+                    <div style="display: inline-flex; border-radius: 6px; overflow: hidden;">
+                        <button onclick="editTransaksi({{ t.id }})" 
+                               title="Edit"
+                               style="padding: 0.5rem 0.7rem; font-size: 0.9rem; display: inline-flex; align-items: center; justify-content: center; border: none; cursor: pointer; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <a href="{{ url_for('hapus', id_transaksi=t.id) }}" 
+                           title="Hapus"
+                           onclick="return deleteTransaction(event, this.href)"
+                           style="padding: 0.5rem 0.7rem; font-size: 0.9rem; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white;">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 30px; color: #94a3b8;">Tidak ada data transaksi ditemukan.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr style="background-color: #f1f5f9; font-weight: bold;">
+                <td colspan="3" style="text-align: right; padding: 12px 15px;">Total</td>
+                <td style="padding: 12px 15px;">{{ total_jumlah | rupiah }}</td>
+                <td colspan="2"></td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+<!-- Modal Form -->
+<div id="transaksiModal" class="modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000;">
+    <div class="modal-content card" style="width: 100%; max-width: 500px; position: relative; max-height: 90vh; overflow-y: auto;">
+        <span class="close" onclick="closeModal()" style="position: absolute; right: 20px; top: 15px; font-size: 24px; cursor: pointer;">&times;</span>
+        <h2 id="modalTitle" style="margin-bottom: 20px;">Tambah Transaksi</h2>
+        
+        <form action="{{ url_for('transaksi') }}" method="post">
+            <input type="hidden" name="aksi" id="formAksi" value="tambah">
+            <input type="hidden" name="id_transaksi" id="idTransaksi">
+            
+            <div class="form-group">
+                <label for="tanggal">Tanggal</label>
+                <input type="date" name="tanggal" id="tanggal" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="tipe">Tipe Transaksi</label>
+                <select name="tipe" id="tipe" class="form-control select2" style="width: 100%;" required data-placeholder="Pilih Tipe Transaksi">
+                    <option value=""></option>
+                    <option value="Pemasukan">Pemasukan</option>
+                    <option value="Pengeluaran">Pengeluaran</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="kategori">Kategori</label>
+                <select name="kategori" id="kategori" class="form-control select2" style="width: 100%;" required data-placeholder="Pilih Kategori">
+                    <!-- Opsi akan diisi via JS -->
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="jumlah">Jumlah (Rp)</label>
+                <input type="text" name="jumlah" id="jumlah" class="form-control rupiah-input" inputmode="numeric" placeholder="0" required autocomplete="off">
+            </div>
+            
+            <div class="form-group">
+                <label for="catatan">Catatan</label>
+                <textarea name="catatan" id="catatan" class="form-control" rows="3" placeholder="Opsional"></textarea>
+            </div>
+            
+            <button type="submit" class="btn-primary" style="width: 100%;">Simpan</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const kategoriPemasukan = ['Gaji', 'Bonus', 'Investasi', 'Lainnya'];
+    const kategoriPengeluaran = ['Makanan', 'Transportasi', 'Belanja', 'Tagihan', 'Hiburan', 'Lainnya'];
+
+    $(document).ready(function() {
+        // Init Select2
+        $('.select2').select2({
+            minimumResultsForSearch: Infinity,
+            placeholder: function(){
+                $(this).data('placeholder');
+            }
+        });
+        
+        // Handle Tipe Change for Kategori using Select2 events
+        $('#tipe').on('select2:select', function (e) {
+            updateKategori();
+        });
+
+        // Initialize kategori options on load
+        // updateKategori(); // Removed to prevent overwriting edit load, handled in openModal
+    });
+
+    function updateKategori(selectedKategori = null) {
+        const tipe = $('#tipe').val();
+        const kategoriSelect = $('#kategori');
+        
+        kategoriSelect.empty();
+        
+        const opsi = tipe === 'Pemasukan' ? kategoriPemasukan : kategoriPengeluaran;
+        
+        // Add empty option for placeholder
+        kategoriSelect.append(new Option('', '', true, true));
+        
+        opsi.forEach(k => {
+            const newOption = new Option(k, k, false, false);
+            kategoriSelect.append(newOption);
+        });
+        
+        // Reset to placeholder
+        kategoriSelect.val(null).trigger('change');
+        
+        if (selectedKategori) {
+            kategoriSelect.val(selectedKategori).trigger('change');
+        } else {
+             kategoriSelect.trigger('change');
+        }
+    }
+
+    function openModal(mode) {
+        document.getElementById('transaksiModal').style.display = 'flex';
+        document.getElementById('formAksi').value = mode;
+        
+        if (mode === 'tambah') {
+            document.getElementById('modalTitle').textContent = 'Tambah Transaksi';
+            document.getElementById('idTransaksi').value = '';
+            document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
+            document.getElementById('jumlah').value = '';
+            document.getElementById('catatan').value = '';
+            
+            // Reset Select2 default
+            $('#tipe').val(null).trigger('change');
+            updateKategori();
+        } else {
+            document.getElementById('modalTitle').textContent = 'Edit Transaksi';
+        }
+    }
+
+    function closeModal() {
+        document.getElementById('transaksiModal').style.display = 'none';
+    }
+
+    async function editTransaksi(id) {
+        openModal('edit');
+        
+        // Fetch data
+        const response = await fetch(`/get_transaksi/${id}`);
+        const data = await response.json();
+        
+        if (data.error) {
+            alert('Data tidak ditemukan');
+            closeModal();
+            return;
+        }
+        
+        document.getElementById('idTransaksi').value = data.id;
+        document.getElementById('tanggal').value = data.tanggal;
+        document.getElementById('jumlah').value = data.jumlah;
+        document.getElementById('catatan').value = data.catatan;
+        
+        // Set Select2 values
+        $('#tipe').val(data.tipe).trigger('change');
+        updateKategori(data.kategori);    
+        
+        // Format jumlah for display
+        if (data.jumlah) {
+            document.getElementById('jumlah').value = parseInt(data.jumlah).toLocaleString('id-ID');
+        }
+    }
+    
+    function deleteTransaction(e, url) {
+        e.preventDefault();
+        
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Data yang dihapus tidak dapat dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
+        
+        return false;
+    }
+
+    // Klik di luar modal untuk menutup
+    window.onclick = function(event) {
+        const modal = document.getElementById('transaksiModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+    
+    // Format Rupiah
+    $('.rupiah-input').on('input', function(){
+        let value = this.value.replace(/[^0-9]/g, '');
+        if (value) {
+            value = parseInt(value, 10).toLocaleString('id-ID');
+        }
+        this.value = value;
+    });
+
+    // Sanitize before submit
+    $('form').on('submit', function() {
+        $('.rupiah-input').each(function() {
+            let value = this.value.replace(/\./g, '');
+            this.value = value;
+        });
+    });
+
+    // Transfer Modal
+    function showTransferModal() {
+        // First get list of users
+        fetch('/api/get-users-transfer')
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success || data.users.length === 0) {
+                    Swal.fire('Info', 'Tidak ada user lain untuk transfer.', 'info');
+                    return;
+                }
+                
+                let userOptions = data.users.map(u => 
+                    `<option value="${u.id}">${u.username}</option>`
+                ).join('');
+                
+                Swal.fire({
+                    title: '<i class="fa-solid fa-money-bill-transfer" style="color: #4facfe;"></i> Transfer Uang',
+                    html: `
+                        <div style="text-align: left; padding: 0 1rem;">
+                            <div style="margin-bottom: 1.2rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151; font-size: 0.9rem;">Kirim ke</label>
+                                <select id="swal-user" style="width: 100%; padding: 0.75rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; background: white; color: #374151;">
+                                    <option value="">-- Pilih User --</option>
+                                    ${userOptions}
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 1.2rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151; font-size: 0.9rem;">Jumlah (Rp)</label>
+                                <input type="text" id="swal-jumlah" placeholder="Contoh: 500.000" style="width: 100%; padding: 0.75rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; box-sizing: border-box;" oninput="formatRupiahTransfer(this)">
+                            </div>
+                            <div style="margin-bottom: 0.5rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151; font-size: 0.9rem;">Catatan (opsional)</label>
+                                <input type="text" id="swal-catatan" placeholder="Keterangan transfer" style="width: 100%; padding: 0.75rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; box-sizing: border-box;">
+                            </div>
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fa-solid fa-paper-plane"></i> Transfer',
+                    cancelButtonText: 'Batal',
+                    confirmButtonColor: '#4facfe',
+                    preConfirm: () => {
+                        const userId = document.getElementById('swal-user').value;
+                        const jumlahRaw = document.getElementById('swal-jumlah').value.replace(/\./g, '');
+                        const catatan = document.getElementById('swal-catatan').value;
+                        
+                        if (!userId) {
+                            Swal.showValidationMessage('Pilih user tujuan transfer');
+                            return false;
+                        }
+                        if (!jumlahRaw || parseFloat(jumlahRaw) <= 0) {
+                            Swal.showValidationMessage('Jumlah harus lebih dari 0');
+                            return false;
+                        }
+                        return { ke_user_id: userId, jumlah: jumlahRaw, catatan: catatan };
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch('/api/transfer', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(result.value)
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil!',
+                                    text: 'Transfer berhasil dilakukan.',
+                                    confirmButtonColor: '#4facfe'
+                                }).then(() => location.reload());
+                            } else {
+                                Swal.fire('Error!', data.message, 'error');
+                            }
+                        });
+                    }
+                });
+            });
+    }
+
+    // Format Rupiah for Transfer modal
+    function formatRupiahTransfer(el) {
+        let value = el.value.replace(/[^0-9]/g, '');
+        if (value) {
+            value = parseInt(value, 10).toLocaleString('id-ID');
+        }
+        el.value = value;
+    }
+</script>
+{% endblock %}

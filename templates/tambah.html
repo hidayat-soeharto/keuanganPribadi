@@ -1,0 +1,111 @@
+{% extends "layout.html" %}
+
+{% block title %}Tambah Transaksi{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="card">
+        <h3>Input Transaksi Baru</h3>
+        <form action="{{ url_for('tambah') }}" method="POST">
+            <div class="form-group">
+                <label for="tanggal">Tanggal</label>
+                <input type="date" id="tanggal" name="tanggal" required class="form-control">
+            </div>
+            
+            <div class="form-group">
+                <label for="tipe">Jenis Transaksi</label>
+                <select id="tipe" name="tipe" class="form-control select2" onchange="updateKategori()" data-placeholder="Pilih Jenis Transaksi">
+                    <option value=""></option>
+                    <option value="Pengeluaran">Pengeluaran</option>
+                    <option value="Pemasukan">Pemasukan</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="kategori">Kategori</label>
+                <select id="kategori" name="kategori" class="form-control select2" data-placeholder="Pilih Kategori">
+                    <!-- Opsi akan diisi via JS -->
+                    <option value="Makan & Minum">Makan & Minum</option>
+                    <option value="Transportasi">Transportasi</option>
+                    <option value="Belanja">Belanja</option>
+                    <option value="Tagihan">Tagihan</option>
+                    <option value="Hiburan">Hiburan</option>
+                    <option value="Lainnya">Lainnya</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="jumlah">Jumlah (Rp)</label>
+                <input type="text" id="jumlah" name="jumlah" inputmode="numeric" required class="form-control rupiah-input" placeholder="Contoh: 50.000" autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label for="catatan">Catatan (Opsional)</label>
+                <textarea id="catatan" name="catatan" class="form-control" rows="3" placeholder="Contoh: Makan siang di warteg"></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Simpan Transaksi</button>
+                <a href="{{ url_for('dashboard') }}" class="btn-secondary">Batal</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Set tanggal hari ini default
+    document.getElementById('tanggal').valueAsDate = new Date();
+
+    $(document).ready(function() {
+        $('.select2').select2({
+            placeholder: function(){
+                $(this).data('placeholder');
+            }
+        });
+        
+        // Simpan default state placeholder
+        $('#tipe').val(null).trigger('change');
+        $('#kategori').val(null).trigger('change');
+    });
+
+    const kategoriPengeluaran = ["Makan & Minum", "Transportasi", "Belanja", "Tagihan", "Hiburan", "Kesehatan", "Pendidikan", "Lainnya"];
+    const kategoriPemasukan = ["Gaji", "Bonus", "Hadiah", "Penjualan", "Investasi", "Lainnya"];
+
+    function updateKategori() {
+        const tipe = document.getElementById('tipe').value;
+        const kategoriSelect = document.getElementById('kategori');
+        kategoriSelect.innerHTML = "<option value=''></option>"; // Clear options and add empty placeholder
+
+        let options = tipe === "Pemasukan" ? kategoriPemasukan : kategoriPengeluaran;
+
+        options.forEach(opt => {
+            let el = document.createElement("option");
+            el.text = opt;
+            el.value = opt;
+            kategoriSelect.add(el);
+        });
+        
+        // Force placeholder
+         $('#kategori').val(null).trigger('change');
+    }
+         $('#kategori').val(null).trigger('change');
+    }
+
+    // Format Rupiah
+    $('.rupiah-input').on('input', function(){
+        let value = this.value.replace(/[^0-9]/g, '');
+        if (value) {
+            value = parseInt(value, 10).toLocaleString('id-ID');
+        }
+        this.value = value;
+    });
+
+    // Sanitize before submit
+    $('form').on('submit', function() {
+        $('.rupiah-input').each(function() {
+            let value = this.value.replace(/\./g, '');
+            this.value = value;
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Keuangan Pribadi</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/x-icon">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- Custom CSS -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- Sidebar Navigation -->
+      <nav class="sidebar">
+        <div class="brand">
+          <i class="fa-solid fa-wallet"></i>
+          <h4>Keuangan Kita</h4>
+        </div>
+        <ul>
+          {% if session.get('user_id') %}
+          <li>
+            <a
+              href="{{ url_for('dashboard') }}"
+              class="{{ 'active' if active_page == 'dashboard' else '' }}"
+            >
+              <i class="fa-solid fa-chart-pie"></i> Dashboard
+            </a>
+          </li>
+          
+          {% if session.get('username') != 'admin' %}
+          <li>
+            <a
+              href="{{ url_for('transaksi') }}"
+              class="{{ 'active' if active_page == 'transaksi' else '' }}"
+            >
+              <i class="fa-solid fa-list"></i> Transaksi
+            </a>
+          </li>
+          {% else %}
+          <li>
+            <a
+              href="{{ url_for('laporan') }}"
+              class="{{ 'active' if active_page == 'laporan' else '' }}"
+            >
+              <i class="fa-solid fa-file-lines"></i> Laporan
+            </a>
+          </li>
+          <li>
+            <a
+              href="{{ url_for('kelola_user') }}"
+              class="{{ 'active' if active_page == 'kelola_user' else '' }}"
+            >
+              <i class="fa-solid fa-users"></i> Kelola User
+            </a>
+          </li>
+          {% endif %}
+          {% else %}
+          <li>
+             <a href="{{ url_for('login') }}" class="{{ 'active' if active_page == 'login' else '' }}">
+                <i class="fa-solid fa-sign-in-alt"></i> Login
+             </a>
+          </li>
+          <li>
+             <a href="{{ url_for('register') }}" class="{{ 'active' if active_page == 'register' else '' }}">
+                <i class="fa-solid fa-user-plus"></i> Daftar
+             </a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <header>
+          <h1>{{ self.title() }}</h1>
+          <div class="user-profile-dropdown">
+            {% if session.get('user_id') %}
+            <div class="profile-trigger" onclick="toggleProfileMenu()">
+              <span>Halo, {{ session.get('username') }}</span>
+              <img
+                src="https://ui-avatars.com/api/?name={{ session.get('username') }}&background=0D8ABC&color=fff"
+                alt="User"
+                class="avatar"
+              />
+              <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem; margin-left: 0.3rem; color: #64748b;"></i>
+            </div>
+            <div class="profile-menu" id="profileMenu">
+              <a href="{{ url_for('logout') }}" onclick="confirmLogout(event)">
+                <i class="fa-solid fa-sign-out-alt"></i> Logout
+              </a>
+            </div>
+            {% else %}
+            <span>Halo, Tamu</span>
+            {% endif %}
+          </div>
+        </header>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+        {% endif %} {% endwith %}
+
+        <div class="content-wrapper">{% block content %}{% endblock %}</div>
+      </main>
+    </div>
+    <script>
+      function confirmLogout(event) {
+        event.preventDefault();
+        const logoutUrl = event.currentTarget.href;
+        
+        Swal.fire({
+          title: 'Yakin ingin logout?',
+          text: "Anda akan keluar dari sesi ini.",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Ya, Logout',
+          cancelButtonText: 'Batal'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = logoutUrl;
+          }
+        });
+      }
+
+      // Auto-dismiss flash messages after 5 seconds
+      $(document).ready(function() {
+        setTimeout(function() {
+          $('.alert').fadeOut('slow');
+        }, 5000);
+      });
+
+      // Profile dropdown toggle
+      function toggleProfileMenu() {
+        const menu = document.getElementById('profileMenu');
+        menu.classList.toggle('show');
+      }
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function(e) {
+        const dropdown = document.querySelector('.user-profile-dropdown');
+        const menu = document.getElementById('profileMenu');
+        if (dropdown && menu && !dropdown.contains(e.target)) {
+          menu.classList.remove('show');
+        }
+      });
+    </script>
+  </body>
+</html>

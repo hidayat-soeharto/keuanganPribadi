@@ -1,0 +1,102 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <!-- Filter removed as requested -->
+
+    <!-- Summary Cards -->
+    <div class="card summary-card saldo">
+        <h3>Total Saldo</h3>
+        <p class="amount">{{ ringkasan.saldo | rupiah }}</p>
+    </div>
+    <div class="card summary-card pemasukan">
+        <h3>Pemasukan Bulan Ini</h3>
+        <p class="amount positive">+ {{ ringkasan.pemasukan | rupiah }}</p>
+    </div>
+    <div class="card summary-card pengeluaran">
+        <h3>Pengeluaran Bulan Ini</h3>
+        <p class="amount negative">- {{ ringkasan.pengeluaran | rupiah }}</p>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="card chart-container">
+        <h3>Statistik Keuangan</h3>
+        <canvas id="financeChart"></canvas>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="card recent-transactions">
+        <div class="card-header">
+            <h3>Transaksi Terakhir</h3>
+            <a href="{{ url_for('transaksi') }}" class="btn-link">Lihat Semua</a>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tanggal</th>
+                    <th>Kategori</th>
+                    <th>Jumlah</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in transaksi %}
+                <tr>
+                    <td>{{ t.tanggal }}</td>
+                    <td>
+                        <span class="badge {{ 'bg-green' if t.tipe == 'Pemasukan' else 'bg-red' }}">
+                            {{ t.kategori }}
+                        </span>
+                    </td>
+                    <td class="{{ 'positive' if t.tipe == 'Pemasukan' else 'negative' }}">
+                        {{ '+' if t.tipe == 'Pemasukan' else '-' }} {{ t.jumlah | rupiah }}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3" class="text-center">Belum ada transaksi.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Data untuk Chart.js yang dikirim dari Flask (via script tag simpel dulu)
+    const incomeObj = {{ ringkasan.pemasukan }};
+    const expenseObj = {{ ringkasan.pengeluaran }};
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('financeChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Pemasukan', 'Pengeluaran'],
+                datasets: [{
+                    data: [incomeObj, expenseObj],
+                    backgroundColor: [
+                        'rgba(46, 204, 113, 0.6)',
+                        'rgba(231, 76, 60, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgba(46, 204, 113, 1)',
+                        'rgba(231, 76, 60, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

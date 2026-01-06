@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Keuanganku - Keuangan Pribadi</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/x-icon">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <!-- Custom CSS -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body class="auth-body">
+    
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %} 
+    {% if messages %}
+    <div class="flash-messages-auth" style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+      {% for category, message in messages %}
+      <div class="alert alert-{{ category }}" style="padding: 15px; border-radius: 8px; margin-bottom: 10px; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-left: 4px solid #3b82f6;">
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %} 
+    {% endwith %}
+
+
+    <div class="auth-background">
+        <i class="fa-solid fa-coins"></i>
+        <i class="fa-solid fa-wallet"></i>
+        <i class="fa-solid fa-chart-line"></i>
+        <i class="fa-solid fa-money-bill-wave"></i>
+        <i class="fa-solid fa-sack-dollar"></i>
+        <i class="fa-solid fa-credit-card"></i>
+        <i class="fa-solid fa-vault"></i>
+        <i class="fa-solid fa-file-invoice-dollar"></i>
+        <i class="fa-solid fa-piggy-bank"></i>
+        <i class="fa-solid fa-hand-holding-dollar"></i>
+    </div>
+
+    <div class="auth-wrapper">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      // Auto-dismiss flash messages after 5 seconds
+      $(document).ready(function() {
+        setTimeout(function() {
+          $('.flash-messages-auth').fadeOut('slow');
+        }, 5000);
+      });
+    </script>
+
+  </body>
+</html>

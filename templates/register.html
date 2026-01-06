@@ -1,0 +1,30 @@
+{% extends "auth_layout.html" %}
+
+{% block title %}Daftar Akun{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Buat Akun Baru</h2>
+            <p>Bergabunglah bersama kami sekarang</p>
+        </div>
+        
+        <form action="{{ url_for('register') }}" method="post" class="auth-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Pilih username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Buat password yang kuat" required>
+            </div>
+            <button type="submit" class="btn-auth">Daftar Sekarang</button>
+        </form>
+        
+        <div class="auth-footer">
+            <p>Sudah punya akun? <a href="{{ url_for('login') }}">Login disini</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

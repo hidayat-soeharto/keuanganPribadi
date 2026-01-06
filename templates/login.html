@@ -1,0 +1,95 @@
+{% extends "auth_layout.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Selamat Datang</h2>
+            <p>Silakan login untuk melanjutkan</p>
+        </div>
+        
+        <form action="{{ url_for('login') }}" method="post" class="auth-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Masukkan username Anda" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Masukkan password Anda" required>
+            </div>
+            <button type="submit" class="btn-auth">Login Masuk</button>
+        </form>
+        
+        <div class="auth-footer">
+            <p><a href="javascript:void(0)" onclick="showLupaPasswordModal()">Lupa Password?</a></p>
+            <p style="margin-top: 0.5rem;">Belum punya akun? <a href="{{ url_for('register') }}">Daftar disini</a></p>
+        </div>
+    </div>
+</div>
+
+<script>
+function showLupaPasswordModal() {
+    Swal.fire({
+        title: 'Lupa Password',
+        html: `
+            <div style="text-align: left;">
+                <p style="color: #64748b; margin-bottom: 1rem; font-size: 0.9rem;">Masukkan username dan password baru Anda</p>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #475569;">Username</label>
+                    <input type="text" id="swal-username" class="swal2-input" placeholder="Username Anda" style="width: 100%; margin: 0;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #475569;">Password Baru</label>
+                    <input type="password" id="swal-password" class="swal2-input" placeholder="Minimal 4 karakter" style="width: 100%; margin: 0;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #475569;">Konfirmasi Password</label>
+                    <input type="password" id="swal-confirm" class="swal2-input" placeholder="Ulangi password baru" style="width: 100%; margin: 0;">
+                </div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Reset Password',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#4facfe',
+        preConfirm: () => {
+            const username = document.getElementById('swal-username').value;
+            const password = document.getElementById('swal-password').value;
+            const confirm = document.getElementById('swal-confirm').value;
+            
+            if (!username) {
+                Swal.showValidationMessage('Username wajib diisi');
+                return false;
+            }
+            if (!password || password.length < 4) {
+                Swal.showValidationMessage('Password minimal 4 karakter');
+                return false;
+            }
+            if (password !== confirm) {
+                Swal.showValidationMessage('Konfirmasi password tidak cocok');
+                return false;
+            }
+            return { username: username, password: password };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('/api/lupa-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(result.value)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire('Berhasil!', 'Password berhasil direset. Silakan login.', 'success');
+                } else {
+                    Swal.fire('Error!', data.message, 'error');
+                }
+            });
+        }
+    });
+}
+</script>
+{% endblock %}
