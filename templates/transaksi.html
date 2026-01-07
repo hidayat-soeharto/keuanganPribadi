@@ -18,25 +18,25 @@
         </div>
         
         <!-- Filter Form -->
-        <form id="filterForm" action="{{ url_for('transaksi') }}" method="get" class="filter-form" style="display: flex; gap: 15px; flex-wrap: wrap; background: #f8fafc; padding: 20px; border-radius: 12px; align-items: flex-end; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-            <div style="flex: 1; min-width: 150px;">
+        <form id="filterForm" action="{{ url_for('transaksi') }}" method="get" class="filter-form filter-compact" style="background: #f8fafc; padding: 15px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+            <div class="form-group">
                 <label for="start_date" style="font-size: 0.85rem; font-weight: 600; color: #64748b; margin-bottom: 8px;">Dari Tanggal</label>
                 <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date if start_date else '' }}" required>
             </div>
-            <div style="flex: 1; min-width: 150px;">
+            <div class="form-group">
                 <label for="end_date" style="font-size: 0.85rem; font-weight: 600; color: #64748b; margin-bottom: 8px;">Sampai Tanggal</label>
                 <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date if end_date else '' }}" required>
             </div>
-            <div style="flex: 1; min-width: 150px;">
+            <div class="form-group">
                 <label for="filter_tipe" style="font-size: 0.85rem; font-weight: 600; color: #64748b; margin-bottom: 8px;">Tipe</label>
-                <select name="tipe" id="filter_tipe" class="form-control select2" data-placeholder="Pilih Tipe">
-                    <option value=""></option>
+                <select name="tipe" id="filter_tipe" class="form-control" data-placeholder="Pilih Tipe">
+                    <option value="" {{ 'selected' if not filter_tipe else '' }} disabled>Pilih Tipe</option>
                     <option value="Semua" {{ 'selected' if filter_tipe == 'Semua' else '' }}>Semua Tipe</option>
                     <option value="Pemasukan" {{ 'selected' if filter_tipe == 'Pemasukan' else '' }}>Pemasukan</option>
                     <option value="Pengeluaran" {{ 'selected' if filter_tipe == 'Pengeluaran' else '' }}>Pengeluaran</option>
                 </select>
             </div>
-            <div style="display: flex; gap: 10px;">
+            <div class="btn-container">
                 <button type="submit" class="btn-primary" style="padding: 0.6rem 1.2rem; display: flex; align-items: center; gap: 8px; border-radius: 8px;">
                     <i class="fa-solid fa-filter"></i> Filter
                 </button>
@@ -54,35 +54,35 @@
                 <th>Tipe</th>
                 <th>Kategori</th>
                 <th>Jumlah</th>
-                <th>Catatan</th>
+                <th class="mobile-hidden">Catatan</th>
                 <th style="width: 100px; text-align: center;">Aksi</th>
             </tr>
         </thead>
         <tbody>
             {% for t in transaksi %}
             <tr>
-                <td>{{ t.tanggal }}</td>
-                <td>
+                <td data-label="Tanggal">{{ t.tanggal }}</td>
+                <td data-label="Tipe">
                     <span class="badge {{ 'bg-green' if t.tipe == 'Pemasukan' else 'bg-red' }}">
                         {{ t.tipe }}
                     </span>
                 </td>
-                <td>{{ t.kategori }}</td>
-                <td class="{{ 'positive' if t.tipe == 'Pemasukan' else 'negative' }}">
+                <td data-label="Kategori">{{ t.kategori }}</td>
+                <td data-label="Jumlah" class="{{ 'positive' if t.tipe == 'Pemasukan' else 'negative' }}">
                     {{ t.jumlah | rupiah }}
                 </td>
-                <td>{{ t.catatan }}</td>
-                <td>
+                <td data-label="Catatan" class="mobile-hidden">{{ t.catatan }}</td>
+                <td data-label="Aksi">
                     <div style="display: inline-flex; border-radius: 6px; overflow: hidden;">
                         <button onclick="editTransaksi({{ t.id }})" 
                                title="Edit"
-                               style="padding: 0.5rem 0.7rem; font-size: 0.9rem; display: inline-flex; align-items: center; justify-content: center; border: none; cursor: pointer; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                               style="padding: 0.3rem 0.5rem; font-size: 0.7rem; display: inline-flex; align-items: center; justify-content: center; border: none; cursor: pointer; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
                             <i class="fa-solid fa-pen"></i>
                         </button>
                         <a href="{{ url_for('hapus', id_transaksi=t.id) }}" 
                            title="Hapus"
                            onclick="return deleteTransaction(event, this.href)"
-                           style="padding: 0.5rem 0.7rem; font-size: 0.9rem; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white;">
+                           style="padding: 0.3rem 0.5rem; font-size: 0.7rem; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white;">
                             <i class="fa-solid fa-trash"></i>
                         </a>
                     </div>

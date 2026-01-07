@@ -10,15 +10,15 @@
 <!-- Ringkasan Cards (Global) -->
 <div class="dashboard-grid" style="margin-bottom: 1.5rem;">
     <div class="card summary-card">
-        <h3>Total Pemasukan (Global)</h3>
+        <h3>Pemasukan (Global)</h3>
         <div class="amount positive">{{ ringkasan['pemasukan'] | rupiah }}</div>
     </div>
     <div class="card summary-card">
-        <h3>Total Pengeluaran (Global)</h3>
+        <h3>Pengeluaran (Global)</h3>
         <div class="amount negative">{{ ringkasan['pengeluaran'] | rupiah }}</div>
     </div>
     <div class="card summary-card saldo">
-        <h3>Total Saldo Sistem</h3>
+        <h3>Saldo Sistem</h3>
         <div class="amount">{{ ringkasan['saldo'] | rupiah }}</div>
     </div>
 </div>
@@ -47,19 +47,19 @@
             <thead>
                 <tr>
                     <th>Tanggal</th>
-                    <th>User</th>
-                    <th>Tipe</th>
+                    <th class="mobile-hidden">User</th>
+                    <th class="mobile-hidden">Tipe</th>
                     <th>Kategori</th>
                     <th>Jumlah</th>
-                    <th>Catatan</th>
+                    <th class="mobile-hidden">Catatan</th>
                 </tr>
             </thead>
             <tbody>
                 {% for t in transaksi[:10] %}
                 <tr>
                     <td>{{ t['tanggal'] }}</td>
-                    <td><span class="badge" style="background: #e2e8f0; color: #475569;">{{ t['username'] }}</span></td>
-                    <td>
+                    <td class="mobile-hidden"><span class="badge" style="background: #e2e8f0; color: #475569;">{{ t['username'] }}</span></td>
+                    <td class="mobile-hidden">
                         <span class="badge {{ 'bg-green' if t['tipe'] == 'Pemasukan' else 'bg-red' }}">
                             {{ t['tipe'] }}
                         </span>
@@ -68,7 +68,7 @@
                     <td class="{{ 'text-green-600' if t['tipe'] == 'Pemasukan' else 'text-red-600' }}">
                         {{ t['jumlah'] | rupiah }}
                     </td>
-                    <td>{{ t['catatan'] }}</td>
+                    <td class="mobile-hidden">{{ t['catatan'] }}</td>
                 </tr>
                 {% else %}
                 <tr>
@@ -107,12 +107,31 @@ new Chart(userCtx, {
     options: {
         responsive: true,
         maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                labels: {
+                    font: {
+                        size: 10
+                    }
+                }
+            }
+        },
         scales: {
             y: {
                 beginAtZero: true,
                 ticks: {
+                    font: {
+                        size: 9
+                    },
                     callback: function(value) {
                         return 'Rp ' + value.toLocaleString('id-ID');
+                    }
+                }
+            },
+            x: {
+                ticks: {
+                    font: {
+                        size: 9
                     }
                 }
             }
@@ -137,7 +156,12 @@ new Chart(globalCtx, {
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                position: 'bottom'
+                position: 'bottom',
+                labels: {
+                    font: {
+                        size: 10
+                    }
+                }
             }
         }
     }

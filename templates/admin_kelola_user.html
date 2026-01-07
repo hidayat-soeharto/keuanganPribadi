@@ -21,9 +21,9 @@
                 <tr>
                     <th>No</th>
                     <th>Username</th>
-                    <th>Total Transaksi</th>
-                    <th>Total Pemasukan</th>
-                    <th>Total Pengeluaran</th>
+                    <th class="mobile-hidden">Total Transaksi</th>
+                    <th class="mobile-hidden">Total Pemasukan</th>
+                    <th class="mobile-hidden">Total Pengeluaran</th>
                     <th>Saldo</th>
                     <th>Aksi</th>
                 </tr>
@@ -31,31 +31,31 @@
             <tbody>
                 {% for user in users %}
                 <tr>
-                    <td>{{ loop.index }}</td>
-                    <td>
+                    <td data-label="No">{{ loop.index }}</td>
+                    <td data-label="Username">
                         <div style="display: flex; align-items: center; gap: 0.8rem;">
                             <img src="https://ui-avatars.com/api/?name={{ user['username'] }}&background=0D8ABC&color=fff" 
                                  alt="{{ user['username'] }}" 
-                                 style="width: 32px; height: 32px; border-radius: 50%;">
+                                 style="width: 22px; height: 22px; border-radius: 50%;">
                             <span style="font-weight: 500;">{{ user['username'] }}</span>
                         </div>
                     </td>
-                    <td>{{ user['total_transaksi'] }}</td>
-                    <td style="color: #2ecc71; font-weight: 500;">{{ user['total_pemasukan'] | rupiah }}</td>
-                    <td style="color: #e74c3c; font-weight: 500;">{{ user['total_pengeluaran'] | rupiah }}</td>
-                    <td style="font-weight: 600;">{{ (user['total_pemasukan'] - user['total_pengeluaran']) | rupiah }}</td>
-                    <td>
+                    <td data-label="Total Transaksi" class="mobile-hidden">{{ user['total_transaksi'] }}</td>
+                    <td data-label="Total Pemasukan" class="mobile-hidden" style="color: #2ecc71; font-weight: 500;">{{ user['total_pemasukan'] | rupiah }}</td>
+                    <td data-label="Total Pengeluaran" class="mobile-hidden" style="color: #e74c3c; font-weight: 500;">{{ user['total_pengeluaran'] | rupiah }}</td>
+                    <td data-label="Saldo" style="font-weight: 600;">{{ (user['total_pemasukan'] - user['total_pengeluaran']) | rupiah }}</td>
+                    <td data-label="Aksi">
                         <div style="display: inline-flex; border-radius: 6px; overflow: hidden;">
                             <a href="javascript:void(0)" 
                                onclick="showEditUserModal({{ user['id'] }}, '{{ user['username'] }}')"
                                title="Edit User"
-                               style="padding: 0.5rem 0.7rem; font-size: 0.9rem; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                               style="padding: 0.3rem 0.5rem; font-size: 0.7rem; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
                                 <i class="fa-solid fa-pen"></i>
                             </a>
                             <a href="{{ url_for('hapus_user', user_id=user['id']) }}" 
                                title="Hapus User"
                                onclick="return confirmHapusUser(event, '{{ user['username'] }}')"
-                               style="padding: 0.5rem 0.7rem; font-size: 0.9rem; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white;">
+                               style="padding: 0.3rem 0.5rem; font-size: 0.7rem; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white;">
                                 <i class="fa-solid fa-trash"></i>
                             </a>
                         </div>

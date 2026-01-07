@@ -10,18 +10,18 @@
 <!-- Filter Form -->
 <div class="card" style="margin-bottom: 2rem; padding: 1.5rem;">
     <form method="GET" action="{{ url_for('laporan') }}">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; align-items: end;">
-            <div class="form-group" style="margin-bottom: 0;">
-                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #475569; font-size: 0.85rem;">Dari Tanggal</label>
-                <input type="date" name="start_date" class="form-control" value="{{ start_date }}" style="width: 100%; padding: 0.6rem 0.8rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem;">
+        <div class="filter-compact">
+            <div class="form-group">
+                <label style="display: block; margin-bottom: 0.3rem; font-weight: 500; color: #475569; font-size: 0.8rem;">Dari Tanggal</label>
+                <input type="date" name="start_date" class="form-control" value="{{ start_date }}" style="width: 100%; padding: 0.5rem 0.7rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.8rem;">
             </div>
-            <div class="form-group" style="margin-bottom: 0;">
-                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #475569; font-size: 0.85rem;">Sampai Tanggal</label>
-                <input type="date" name="end_date" class="form-control" value="{{ end_date }}" style="width: 100%; padding: 0.6rem 0.8rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem;">
+            <div class="form-group">
+                <label style="display: block; margin-bottom: 0.3rem; font-weight: 500; color: #475569; font-size: 0.8rem;">Sampai Tanggal</label>
+                <input type="date" name="end_date" class="form-control" value="{{ end_date }}" style="width: 100%; padding: 0.5rem 0.7rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.8rem;">
             </div>
-            <div class="form-group" style="margin-bottom: 0;">
-                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #475569; font-size: 0.85rem;">User</label>
-                <select name="user_id" class="form-control" style="width: 100%; padding: 0.6rem 0.8rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; background: white; color: {{ '#94a3b8' if not filter_user else '#1e293b' }};">
+            <div class="form-group">
+                <label style="display: block; margin-bottom: 0.3rem; font-weight: 500; color: #475569; font-size: 0.8rem;">User</label>
+                <select name="user_id" class="form-control" style="width: 100%; padding: 0.5rem 0.7rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.8rem; background: white; color: {{ '#94a3b8' if not filter_user else '#1e293b' }};">
                     <option value="" disabled {{ 'selected' if not filter_user else '' }} style="color: #94a3b8;">-- Pilih User --</option>
                     <option value="" {{ 'selected' if filter_user == '' else '' }}>Semua User</option>
                     {% for user in users %}
@@ -29,20 +29,20 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="form-group" style="margin-bottom: 0;">
-                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #475569; font-size: 0.85rem;">Tipe</label>
-                <select name="tipe" class="form-control" style="width: 100%; padding: 0.6rem 0.8rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; background: white; color: {{ '#94a3b8' if not filter_tipe else '#1e293b' }};">
+            <div class="form-group">
+                <label style="display: block; margin-bottom: 0.3rem; font-weight: 500; color: #475569; font-size: 0.8rem;">Tipe</label>
+                <select name="tipe" class="form-control" style="width: 100%; padding: 0.5rem 0.7rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.8rem; background: white; color: {{ '#94a3b8' if not filter_tipe else '#1e293b' }};">
                     <option value="" disabled {{ 'selected' if not filter_tipe else '' }} style="color: #94a3b8;">-- Pilih Tipe --</option>
                     <option value="" {{ 'selected' if filter_tipe == '' else '' }}>Semua Tipe</option>
                     <option value="Pemasukan" {{ 'selected' if filter_tipe == 'Pemasukan' else '' }}>Pemasukan</option>
                     <option value="Pengeluaran" {{ 'selected' if filter_tipe == 'Pengeluaran' else '' }}>Pengeluaran</option>
                 </select>
             </div>
-            <div style="display: flex; gap: 0.5rem;">
-                <button type="submit" class="btn-primary" style="padding: 0.6rem 1.2rem; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
+            <div class="btn-container">
+                <button type="submit" class="btn-primary" style="padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.4rem; white-space: nowrap;">
                     <i class="fa-solid fa-filter"></i> Filter
                 </button>
-                <a href="{{ url_for('laporan') }}" class="btn-secondary" style="padding: 0.6rem 1rem; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; text-decoration: none;">
+                <a href="{{ url_for('laporan') }}" class="btn-secondary" style="padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.4rem; white-space: nowrap; text-decoration: none;">
                     <i class="fa-solid fa-rotate-left"></i> Reset
                 </a>
             </div>
@@ -53,11 +53,11 @@
 <!-- Summary Cards -->
 <div class="dashboard-grid" style="margin-bottom: 1.5rem;">
     <div class="card summary-card">
-        <h3>Total Pemasukan</h3>
+        <h3>Pemasukan</h3>
         <div class="amount positive">{{ total_pemasukan | rupiah }}</div>
     </div>
     <div class="card summary-card">
-        <h3>Total Pengeluaran</h3>
+        <h3>Pengeluaran</h3>
         <div class="amount negative">{{ total_pengeluaran | rupiah }}</div>
     </div>
     <div class="card summary-card saldo">
@@ -78,28 +78,28 @@
             <thead>
                 <tr>
                     <th>Tanggal</th>
-                    <th>User</th>
+                    <th class="mobile-hidden">User</th>
                     <th>Tipe</th>
                     <th>Kategori</th>
                     <th>Jumlah</th>
-                    <th>Catatan</th>
+                    <th class="mobile-hidden">Catatan</th>
                 </tr>
             </thead>
             <tbody>
                 {% for t in transaksi %}
                 <tr>
-                    <td>{{ t['tanggal'] }}</td>
-                    <td><span class="badge" style="background: #e2e8f0; color: #475569; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.8rem;">{{ t['username'] }}</span></td>
-                    <td>
+                    <td data-label="Tanggal">{{ t['tanggal'] }}</td>
+                    <td data-label="User" class="mobile-hidden"><span class="badge" style="background: #e2e8f0; color: #475569; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.8rem;">{{ t['username'] }}</span></td>
+                    <td data-label="Tipe">
                         <span class="badge {{ 'bg-green' if t['tipe'] == 'Pemasukan' else 'bg-red' }}">
                             {{ t['tipe'] }}
                         </span>
                     </td>
-                    <td>{{ t['kategori'] }}</td>
-                    <td style="font-weight: 600; color: {{ '#2ecc71' if t['tipe'] == 'Pemasukan' else '#e74c3c' }};">
+                    <td data-label="Kategori">{{ t['kategori'] }}</td>
+                    <td data-label="Jumlah" style="font-weight: 600; color: {{ '#2ecc71' if t['tipe'] == 'Pemasukan' else '#e74c3c' }};">
                         {{ t['jumlah'] | rupiah }}
                     </td>
-                    <td style="color: #64748b;">{{ t['catatan'] or '-' }}</td>
+                    <td data-label="Catatan" class="mobile-hidden" style="color: #64748b;">{{ t['catatan'] or '-' }}</td>
                 </tr>
                 {% else %}
                 <tr>

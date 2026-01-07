@@ -35,8 +35,10 @@
   </head>
   <body>
     <div class="app-container">
+      <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
       <!-- Sidebar Navigation -->
-      <nav class="sidebar">
+      <nav class="sidebar" id="sidebar">
         <div class="brand">
           <i class="fa-solid fa-wallet"></i>
           <h4>Keuangan Kita</h4>
@@ -97,6 +99,9 @@
       <!-- Main Content -->
       <main class="main-content">
         <header>
+          <div class="menu-toggle" onclick="toggleSidebar()">
+            <i class="fa-solid fa-bars"></i>
+          </div>
           <h1>{{ self.title() }}</h1>
           <div class="user-profile-dropdown">
             {% if session.get('user_id') %}
@@ -134,6 +139,11 @@
       </main>
     </div>
     <script>
+      function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.querySelector('.sidebar-overlay').classList.toggle('active');
+      }
+
       function confirmLogout(event) {
         event.preventDefault();
         const logoutUrl = event.currentTarget.href;
