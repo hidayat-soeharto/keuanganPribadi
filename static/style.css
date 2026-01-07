@@ -1056,3 +1056,175 @@ table thead th {
   letter-spacing: 0.5px;
   font-size: 0.7rem;
 }
+
+/* ========================================
+   MOBILE RESPONSIVENESS IMPROVEMENTS
+   Matching Admin Dashboard Compact Design
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* Header and Title Adjustments */
+    .card-header h2 {
+        font-size: 0.95rem !important;
+        font-weight: 700;
+    }
+    
+    header h1 {
+        font-size: 1.1rem !important;
+    }
+    
+    /* Card Padding - More Compact */
+    .card {
+        padding: 1rem !important;
+    }
+    
+    /* Button Adjustments - Smaller and More Compact */
+    .btn-primary, .btn-secondary {
+        padding: 0.5rem 0.8rem !important;
+        font-size: 0.65rem !important;
+        gap: 0.4rem;
+    }
+    
+    .btn-primary i, .btn-secondary i {
+        font-size: 0.7rem;
+    }
+    
+    /* Form Label - Smaller Font */
+    .form-group label,
+    .filter-form label {
+        font-size: 0.7rem !important;
+        margin-bottom: 0.4rem !important;
+    }
+    
+    /* Form Control - Compact */
+    .form-control {
+        padding: 0.6rem 0.8rem !important;
+        font-size: 0.75rem !important;
+    }
+    
+    /* Filter Form - More Compact */
+    .filter-form {
+        padding: 12px !important;
+        gap: 0.4rem !important;
+    }
+    
+    .filter-compact {
+        gap: 0.4rem !important;
+    }
+    
+    .filter-compact .btn-container {
+        margin-top: 0.4rem !important;
+        gap: 0.4rem !important;
+    }
+    
+    /* Table Adjustments - Compact */
+    table {
+        font-size: 0.7rem !important;
+    }
+    
+    th {
+        font-size: 0.65rem !important;
+        padding: 0.5rem 0.3rem !important;
+    }
+    
+    td {
+        font-size: 0.7rem !important;
+        padding: 0.5rem 0.3rem !important;
+    }
+    
+    /* Badge - Smaller */
+    .badge {
+        padding: 0.25rem 0.5rem !important;
+        font-size: 0.65rem !important;
+    }
+    
+    /* Summary Cards - Compact */
+    .summary-card h3 {
+        font-size: 0.6rem !important;
+        margin-bottom: 0.3rem !important;
+    }
+    
+    .summary-card .amount {
+        font-size: 0.75rem !important;
+    }
+    
+    /* Profile Trigger - Smaller */
+    .profile-trigger {
+        padding: 0.3rem 0.6rem !important;
+        font-size: 0.65rem !important;
+    }
+    
+    .avatar {
+        width: 28px !important;
+        height: 28px !important;
+    }
+    
+    /* Modal Adjustments */
+    .modal-content {
+        padding: 1rem !important;
+    }
+    
+    .modal-content h2 {
+        font-size: 1rem !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    /* Select2 Mobile Adjustments */
+    .select2-container .select2-selection--single {
+        height: 36px !important;
+        font-size: 0.75rem !important;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px !important;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        font-size: 0.75rem !important;
+        line-height: 36px !important;
+    }
+    
+    .select2-results__option {
+        font-size: 0.7rem !important;
+        padding: 0.4rem 0.6rem !important;
+    }
+    
+    /* Action Buttons in Table - Compact */
+    td button, td a {
+        padding: 0.25rem 0.4rem !important;
+        font-size: 0.65rem !important;
+    }
+    
+    td button i, td a i {
+        font-size: 0.7rem !important;
+    }
+    
+    /* Alert Messages - Compact */
+    .alert {
+        padding: 0.6rem !important;
+        font-size: 0.75rem !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    /* Dashboard Grid - Ensure 3 columns fit */
+    .dashboard-grid {
+        gap: 0.4rem !important;
+    }
+    
+    /* Footer in Tables */
+    tfoot td {
+        font-size: 0.7rem !important;
+        padding: 0.6rem 0.3rem !important;
+    }
+    
+    /* Reduce spacing in card headers */
+    .card-header {
+        margin-bottom: 1rem !important;
+        gap: 0.5rem;
+    }
+    
+    /* Compact description text */
+    .dashboard-header p {
+        font-size: 0.7rem !important;
+    }
+}
