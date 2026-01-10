@@ -8,9 +8,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <h2>Daftar Transaksi</h2>
             <div style="display: flex; gap: 10px;">
-                <button class="btn-secondary" onclick="showTransferModal()" style="padding: 0.6rem 1.2rem; display: flex; align-items: center; gap: 8px; border: none; cursor: pointer;">
-                    <i class="fa-solid fa-money-bill-transfer"></i> Transfer
-                </button>
+
                 <button class="btn-primary" onclick="openModal('tambah')">
                     <i class="fa-solid fa-plus"></i> Tambah Data
                 </button>
@@ -295,93 +293,6 @@
         });
     });
 
-    // Transfer Modal
-    function showTransferModal() {
-        // First get list of users
-        fetch('/api/get-users-transfer')
-            .then(res => res.json())
-            .then(data => {
-                if (!data.success || data.users.length === 0) {
-                    Swal.fire('Info', 'Tidak ada user lain untuk transfer.', 'info');
-                    return;
-                }
-                
-                let userOptions = data.users.map(u => 
-                    `<option value="${u.id}">${u.username}</option>`
-                ).join('');
-                
-                Swal.fire({
-                    title: '<i class="fa-solid fa-money-bill-transfer" style="color: #4facfe;"></i> Transfer Uang',
-                    html: `
-                        <div style="text-align: left; padding: 0 1rem;">
-                            <div style="margin-bottom: 1.2rem;">
-                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151; font-size: 0.9rem;">Kirim ke</label>
-                                <select id="swal-user" style="width: 100%; padding: 0.75rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; background: white; color: #374151;">
-                                    <option value="">-- Pilih User --</option>
-                                    ${userOptions}
-                                </select>
-                            </div>
-                            <div style="margin-bottom: 1.2rem;">
-                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151; font-size: 0.9rem;">Jumlah (Rp)</label>
-                                <input type="text" id="swal-jumlah" placeholder="Contoh: 500.000" style="width: 100%; padding: 0.75rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; box-sizing: border-box;" oninput="formatRupiahTransfer(this)">
-                            </div>
-                            <div style="margin-bottom: 0.5rem;">
-                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151; font-size: 0.9rem;">Catatan (opsional)</label>
-                                <input type="text" id="swal-catatan" placeholder="Keterangan transfer" style="width: 100%; padding: 0.75rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; box-sizing: border-box;">
-                            </div>
-                        </div>
-                    `,
-                    showCancelButton: true,
-                    confirmButtonText: '<i class="fa-solid fa-paper-plane"></i> Transfer',
-                    cancelButtonText: 'Batal',
-                    confirmButtonColor: '#4facfe',
-                    preConfirm: () => {
-                        const userId = document.getElementById('swal-user').value;
-                        const jumlahRaw = document.getElementById('swal-jumlah').value.replace(/\./g, '');
-                        const catatan = document.getElementById('swal-catatan').value;
-                        
-                        if (!userId) {
-                            Swal.showValidationMessage('Pilih user tujuan transfer');
-                            return false;
-                        }
-                        if (!jumlahRaw || parseFloat(jumlahRaw) <= 0) {
-                            Swal.showValidationMessage('Jumlah harus lebih dari 0');
-                            return false;
-                        }
-                        return { ke_user_id: userId, jumlah: jumlahRaw, catatan: catatan };
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        fetch('/api/transfer', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(result.value)
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.success) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Berhasil!',
-                                    text: 'Transfer berhasil dilakukan.',
-                                    confirmButtonColor: '#4facfe'
-                                }).then(() => location.reload());
-                            } else {
-                                Swal.fire('Error!', data.message, 'error');
-                            }
-                        });
-                    }
-                });
-            });
-    }
 
-    // Format Rupiah for Transfer modal
-    function formatRupiahTransfer(el) {
-        let value = el.value.replace(/[^0-9]/g, '');
-        if (value) {
-            value = parseInt(value, 10).toLocaleString('id-ID');
-        }
-        el.value = value;
-    }
 </script>
 {% endblock %}

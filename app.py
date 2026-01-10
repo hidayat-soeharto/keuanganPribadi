@@ -2,11 +2,13 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import database as db
 from datetime import datetime
 import locale
+import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = 'kunci_rahasia_aman_jaya'  
+# Use environment variable for secret key, fallback to random key for development
+app.secret_key = os.environ.get('SECRET_KEY') or os.urandom(24).hex()  
 
 db.init_db()
 
@@ -75,8 +77,8 @@ def api_edit_user():
     if new_username != target_user['username'] and db.cek_user(new_username):
         return {'success': False, 'message': 'Username sudah digunakan.'}
     
-    if new_password and len(new_password) < 4:
-        return {'success': False, 'message': 'Password minimal 4 karakter.'}
+    if new_password and len(new_password) < 8:
+        return {'success': False, 'message': 'Password minimal 8 karakter.'}
     
     if new_password:
         hashed = generate_password_hash(new_password)
@@ -86,60 +88,10 @@ def api_edit_user():
     
     return {'success': True}
 
-@app.route('/api/lupa-password', methods=['POST'])
-def api_lupa_password():
-    data = request.get_json()
-    username = data.get('username', '')
-    password = data.get('password', '')
-    
-    user = db.cek_user(username)
-    if not user:
-        return {'success': False, 'message': 'Username tidak ditemukan.'}
-    
-    if len(password) < 4:
-        return {'success': False, 'message': 'Password minimal 4 karakter.'}
-    
-    hashed = generate_password_hash(password)
-    db.update_password(user['id'], hashed)
-    return {'success': True}
+# Password reset API removed for security reasons
+# In production, implement proper password reset with email verification
 
-# API endpoint untuk mendapatkan daftar user lain (untuk transfer)
-@app.route('/api/get-users-transfer')
-@login_required
-def api_get_users_transfer():
-    user_id = session['user_id']
-    users = db.get_users_except(user_id)
-    user_list = [{'id': u['id'], 'username': u['username']} for u in users]
-    return {'success': True, 'users': user_list}
 
-# API endpoint untuk transfer uang
-@app.route('/api/transfer', methods=['POST'])
-@login_required
-def api_transfer():
-    user_id = session['user_id']
-    username = session.get('username')
-    
-    # Admin tidak boleh transfer
-    if username == 'admin':
-        return {'success': False, 'message': 'Admin tidak dapat melakukan transfer.'}
-    
-    data = request.get_json()
-    ke_user_id = data.get('ke_user_id')
-    jumlah = data.get('jumlah', 0)
-    catatan = data.get('catatan', '')
-    
-    if not ke_user_id:
-        return {'success': False, 'message': 'Pilih user tujuan transfer.'}
-    
-    try:
-        jumlah = float(jumlah)
-        if jumlah <= 0:
-            return {'success': False, 'message': 'Jumlah harus lebih dari 0.'}
-    except:
-        return {'success': False, 'message': 'Jumlah tidak valid.'}
-    
-    db.transfer_uang(user_id, ke_user_id, jumlah, catatan)
-    return {'success': True}
 
 @app.route('/transaksi', methods=['GET', 'POST'])
 @login_required
@@ -153,11 +105,25 @@ def transaksi():
              return redirect(url_for('dashboard'))
              
         aksi = request.form.get('aksi')
-        tanggal = request.form['tanggal']
-        tipe = request.form['tipe']
-        kategori = request.form['kategori']
-        jumlah = float(request.form['jumlah'])
-        catatan = request.form['catatan']
+        tanggal = request.form.get('tanggal', '')
+        tipe = request.form.get('tipe', '')
+        kategori = request.form.get('kategori', '')
+        catatan = request.form.get('catatan', '')
+        
+        # Validate required fields
+        if not tanggal or not tipe or not kategori:
+            flash('Semua field wajib diisi.', 'danger')
+            return redirect(url_for('transaksi'))
+        
+        # Validate and convert jumlah
+        try:
+            jumlah = float(request.form['jumlah'])
+            if jumlah <= 0:
+                flash('Jumlah harus lebih dari 0.', 'danger')
+                return redirect(url_for('transaksi'))
+        except (ValueError, KeyError):
+            flash('Jumlah tidak valid. Harap masukkan angka yang benar.', 'danger')
+            return redirect(url_for('transaksi'))
         
         if aksi == 'tambah':
             db.tambah_transaksi(user_id, tanggal, tipe, kategori, jumlah, catatan)
@@ -327,8 +293,19 @@ def register():
         return redirect(url_for('dashboard'))
 
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        
+        # Validate username
+        if not username or len(username) < 3:
+            flash('Username minimal 3 karakter.', 'danger')
+            return render_template('register.html', active_page='register')
+        
+        # Validate password strength
+        if len(password) < 8:
+            flash('Password minimal 8 karakter.', 'danger')
+            return render_template('register.html', active_page='register')
+        
         hashed_password = generate_password_hash(password)
         
         if db.tambah_user(username, hashed_password):

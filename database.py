@@ -45,47 +45,7 @@ def tambah_transaksi(user_id, tanggal, tipe, kategori, jumlah, catatan):
     conn.commit()
     conn.close()
 
-def transfer_uang(dari_user_id, ke_user_id, jumlah, catatan):
-    """Transfer uang antar user - buat 2 transaksi."""
-    conn = sqlite3.connect(DB_NAME)
-    c = conn.cursor()
-    tanggal = datetime.now().strftime('%Y-%m-%d')
-    
-    # Ambil username penerima untuk catatan
-    c.execute('SELECT username FROM users WHERE id = ?', (ke_user_id,))
-    penerima = c.fetchone()
-    nama_penerima = penerima[0] if penerima else 'User'
-    
-    # Ambil username pengirim untuk catatan
-    c.execute('SELECT username FROM users WHERE id = ?', (dari_user_id,))
-    pengirim = c.fetchone()
-    nama_pengirim = pengirim[0] if pengirim else 'User'
-    
-    catatan_lengkap = catatan if catatan else ''
-    
-    # Pengeluaran untuk pengirim
-    c.execute('''INSERT INTO transaksi (user_id, tanggal, tipe, kategori, jumlah, catatan)
-                 VALUES (?, ?, 'Pengeluaran', 'Transfer Keluar', ?, ?)''',
-              (dari_user_id, tanggal, jumlah, f'Transfer ke {nama_penerima}. {catatan_lengkap}'.strip()))
-    
-    # Pemasukan untuk penerima
-    c.execute('''INSERT INTO transaksi (user_id, tanggal, tipe, kategori, jumlah, catatan)
-                 VALUES (?, ?, 'Pemasukan', 'Transfer Masuk', ?, ?)''',
-              (ke_user_id, tanggal, jumlah, f'Transfer dari {nama_pengirim}. {catatan_lengkap}'.strip()))
-    
-    conn.commit()
-    conn.close()
-    return True
 
-def get_users_except(user_id):
-    """Mengambil semua user kecuali user tertentu (untuk dropdown transfer)."""
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
-    c = conn.cursor()
-    c.execute("SELECT id, username FROM users WHERE id != ? AND username != 'admin'", (user_id,))
-    rows = c.fetchall()
-    conn.close()
-    return rows
 
 def tambah_user(username, password):
     """Menambahkan user baru."""
